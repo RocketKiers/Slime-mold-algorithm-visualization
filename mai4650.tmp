@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://bv4v5c4nwt7d2"]
+
+[ext_resource type="Script" path="res://main.gd" id="1_7m6rn"]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_7m6rn")
+number_of_agents = null
+agent_size = 4.0
+agent_color = null
+time = null
