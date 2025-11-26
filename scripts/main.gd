@@ -5,17 +5,17 @@ var map_width: int
 var map_height: int
 var trail_map: Array # A 2d map array to hold pheremone values, recieves the same resolution as the map
 
-const DECAY_RATE: float = 0.05   # How fast the pheromone disappears
-const DIFFUSION_RATE: float = 0.1 # How much the pheromone spreads
+const DECAY_RATE: float = 0.1   # How fast the pheromone disappears
+const DIFFUSION_RATE: float = 0.5 # How much the pheromone spreads
 
-@export var number_of_agents: int = 1000 # Variable for the number of agents
-@export_range(10.0, 500.0) var AGENT_SPEED: float = 250.0 # speed of the moving agents
+@export var number_of_agents: int = 3000 # Variable for the number of agents
+@export_range(10.0, 500.0) var AGENT_SPEED: float = 350.0 # speed of the moving agents
 @export var var_agent_size: float = 2.0 #changable agent size (appended to a absolute sine wave
 
-@export_range(0.1, 10.0) var TURN_STRENGTH: float = 4.0
-@export_range(0.1, 10.0) var RANDOM_TURN_AMOUNT: float = 0.01 # Small random perturbation in radians
-@export_range(1, 10) var SIMULATION_STEPS_PER_FRAME: int = 1
-const DEPOSIT_AMOUNT: float = 2.0 # The amount of pheromone an agent deposits	
+@export_range(0.1, 10.0) var TURN_STRENGTH: float = 1.5
+@export_range(0.1, 10.0) var RANDOM_TURN_AMOUNT: float = 0.5 # Small random perturbation in radians
+@export_range(1, 10) var SIMULATION_STEPS_PER_FRAME: int = 2
+const DEPOSIT_AMOUNT: float = 0.5 # The amount of pheromone an agent deposits	
 
 var agent_color = Color("#FFD700")  #agent color
 var time : float = 0 # input for sine wave
@@ -90,11 +90,28 @@ func _deposit_pheromone(agent: Agent):
 	# Deposit the pheromone (clamping it to a max value to prevent overflow (in this case 10.0))
 	trail_map[pheremone_x][pheremone_y] = min(trail_map[pheremone_x][pheremone_y] + DEPOSIT_AMOUNT, 10.0)
 
+func _update_trail_map(delta: float):
+	# This loop applies the decay over time
+	var visual_decay_rate: int = 3
+	for x in map_width:
+		for y in map_height:
+			var current_value = trail_map[x][y]
+
+			# The DECAY_RATE determines how fast the value drops
+			# Note: This is a percentage decay (current_value * DECAY_RATE)
+			var decay_amount = current_value * DECAY_RATE * delta * visual_decay_rate
+
+			# Subtract the decay amount, ensuring the value doesn't go below zero
+			trail_map[x][y] = max(0.0, current_value - decay_amount)
 
 # _process wordt elke frame gecalled, delta is tijd sinds laatste call
 func _process(delta):
 	time += delta
 	agent_size = (abs(sin(time) * var_agent_size)+3) #pulsing of agents to replicate the real slime mold
+	
+	#make pheremone decay
+	_update_trail_map(delta)
+	
 	queue_redraw()
 	var sub_delta = delta / SIMULATION_STEPS_PER_FRAME #control of time by changing delta
 
@@ -162,8 +179,8 @@ func _move_agents(delta: float):
 func _draw():
 	
 # 1. Loop through every cell in the trail_map
-	for x in map_width:
-		for y in map_height:
+	for x in (map_width):
+		for y in (map_height):
 			var pheromone_value = trail_map[x][y]
 			
 			# Skip drawing if the pheromone is 0

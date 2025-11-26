@@ -6,3 +6,4 @@
 script = ExtResource("1_v35sv")
 AGENT_SPEED = 10.0
 TURN_STRENGTH = 10.0
+RANDOM_TURN_AMOUNT = 1.5
