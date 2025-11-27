@@ -1,6 +1,6 @@
 extends Node2D
 
-const MAP_SCALE: int = 4 # that many pixel make one tile (4x4 tiles)
+const MAP_SCALE: int = 8 # that many pixel make one tile (4x4 tiles)
 var map_width: int
 var map_height: int
 var trail_map: Array # A 2d map array to hold pheremone values, recieves the same resolution as the map
@@ -13,7 +13,7 @@ const DIFFUSION_RATE: float = 0.5 # How much the pheromone spreads
 @export var var_agent_size: float = 2.0 #changable agent size (appended to a absolute sine wave
 
 @export_range(0.1, 10.0) var TURN_STRENGTH: float = 1.5
-@export_range(0.1, 10.0) var RANDOM_TURN_AMOUNT: float = 0.5 # Small random perturbation in radians
+@export_range(0.1, 10.0) var RANDOM_TURN_AMOUNT: float = 1.0 # Small random perturbation in radians
 @export_range(1, 10) var SIMULATION_STEPS_PER_FRAME: int = 2
 const DEPOSIT_AMOUNT: float = 0.5 # The amount of pheromone an agent deposits	
 
@@ -92,7 +92,7 @@ func _deposit_pheromone(agent: Agent):
 
 func _update_trail_map(delta: float):
 	# This loop applies the decay over time
-	var visual_decay_rate: int = 3
+	var visual_decay_rate: int = 4
 	for x in map_width:
 		for y in map_height:
 			var current_value = trail_map[x][y]
@@ -177,8 +177,7 @@ func _move_agents(delta: float):
 
 # agents tekenen
 func _draw():
-	
-# 1. Loop through every cell in the trail_map
+	# 1. Loop through every cell in the trail_map
 	for x in (map_width):
 		for y in (map_height):
 			var pheromone_value = trail_map[x][y]
@@ -197,9 +196,9 @@ func _draw():
 			# 3. Calculate screen position and size
 			var rect_pos = Vector2(x * MAP_SCALE, y * MAP_SCALE)
 			var rect_size = Vector2(MAP_SCALE, MAP_SCALE)
-			var under_rect_size = Vector2(MAP_SCALE + 2, MAP_SCALE + 2)
+			#var under_rect_size = Vector2(MAP_SCALE + 2, MAP_SCALE + 2)
 			# 4. Draw the cell
-			draw_rect(Rect2(rect_pos, under_rect_size), trail_color)
+			#draw_rect(Rect2(rect_pos, under_rect_size), trail_color)
 			draw_rect(Rect2(rect_pos, rect_size), trail_color)
 
 	for agent in agents:
