@@ -4,18 +4,21 @@ const MAP_SCALE: int = 8 # that many pixel make one tile (4x4 tiles)
 var map_width: int
 var map_height: int
 var trail_map: Array # A 2d map array to hold pheremone values, recieves the same resolution as the map
+var agent_map: Array # A 2d map array to track agent density in each cell
 
-const DECAY_RATE: float = 0.1   # How fast the pheromone disappears
+
+const DECAY_RATE: float = 0.4   # How fast the pheromone disappears
 const DIFFUSION_RATE: float = 0.5 # How much the pheromone spreads
 
-@export var number_of_agents: int = 3000 # Variable for the number of agents
-@export_range(10.0, 500.0) var AGENT_SPEED: float = 350.0 # speed of the moving agents
-@export var var_agent_size: float = 2.0 #changable agent size (appended to a absolute sine wave
+@export var number_of_agents: int = 1000 # Variable for the number of agents
+var AGENT_SPEED: float = 10.0 # speed of the moving agents
+var var_agent_size: float = 2.0 #changable agent size (appended to a absolute sine wave
 
-@export_range(0.1, 10.0) var TURN_STRENGTH: float = 1.5
-@export_range(0.1, 10.0) var RANDOM_TURN_AMOUNT: float = 1.0 # Small random perturbation in radians
-@export_range(1, 10) var SIMULATION_STEPS_PER_FRAME: int = 2
-const DEPOSIT_AMOUNT: float = 0.5 # The amount of pheromone an agent deposits	
+var TURN_STRENGTH: float = 1.2
+var RANDOM_TURN_AMOUNT: float = 0.1 # Small random perturbation in radians
+var SIMULATION_STEPS_PER_FRAME: int = 1
+const DEPOSIT_AMOUNT: float = 0.5 # The amount of pheromone an agent deposits
+const MAX_OCCUPANCY: int = 3 #Maximum number of agents allowed in one map cell
 
 var agent_color = Color("#FFD700")  #agent color
 var time : float = 0 # input for sine wave

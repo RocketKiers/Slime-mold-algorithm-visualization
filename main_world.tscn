@@ -4,8 +4,3 @@
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_v35sv")
-number_of_agents = 2000
-AGENT_SPEED = 10.0
-TURN_STRENGTH = 10.0
-RANDOM_TURN_AMOUNT = 2.0
-SIMULATION_STEPS_PER_FRAME = 1
