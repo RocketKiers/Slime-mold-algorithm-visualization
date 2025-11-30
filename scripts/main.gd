@@ -10,11 +10,11 @@ var agent_map: Array # A 2d map array to track agent density in each cell
 const DECAY_RATE: float = 0.4   # How fast the pheromone disappears
 const DIFFUSION_RATE: float = 0.5 # How much the pheromone spreads
 
-@export var number_of_agents: int = 1000 # Variable for the number of agents
+@export var number_of_agents: int = 2000 # Variable for the number of agents
 var AGENT_SPEED: float = 10.0 # speed of the moving agents
 var var_agent_size: float = 2.0 #changable agent size (appended to a absolute sine wave
 
-var TURN_STRENGTH: float = 1.2
+var TURN_STRENGTH: float = 2.0
 var RANDOM_TURN_AMOUNT: float = 0.1 # Small random perturbation in radians
 var SIMULATION_STEPS_PER_FRAME: int = 1
 const DEPOSIT_AMOUNT: float = 0.5 # The amount of pheromone an agent deposits
@@ -33,10 +33,16 @@ func _ready():
 	map_height = int(screen_size.y / MAP_SCALE)
 	# Initialize the 2D array (every coordinate filled with 0.0, same size as normal map)
 	trail_map.resize(map_width)
+	agent_map.resize(map_width)
+	
 	for i in map_width:
 		trail_map[i] = Array()
 		trail_map[i].resize(map_height)
 		trail_map[i].fill(0.0)
+		
+		agent_map[i] = Array()
+		agent_map[i].resize(map_height)
+		agent_map[i].fill(0)
 	
 	_initialize_agents()
 	randomize()
@@ -62,7 +68,6 @@ func _initialize_agents():
 		
 		# 2. Spawn the agents in random directions (from 0 to 2*PI, aka TAU)
 		var random_direction = randf_range(0.0, TAU)
-
 		# 3. spawn a new agent
 		var agent = Agent.new(start_position, random_direction, AGENT_SPEED)
 
@@ -170,13 +175,38 @@ func _move_agents(delta: float):
 		
 		# 3: Movement
 		var velocity = Vector2.from_angle(agent.direction) * agent.speed
+		var potential_position = agent.position + velocity * delta
 
+		potential_position.x = wrapf(potential_position.x, 0.0, screen_size.x)
+		potential_position.y = wrapf(potential_position.y, 0.0, screen_size.y)
+		
+		# Get coordinates for the current and the potential cell
+		var old_map_coords = _world_to_map(agent.position)
+		var new_map_coords = _world_to_map(potential_position)
+		var old_x = int(old_map_coords.x)
+		var old_y = int(old_map_coords.y)
+		var new_x = int(new_map_coords.x)
+		var new_y = int(new_map_coords.y)
+		
+		if agent_map[new_x][new_y] < MAX_OCCUPANCY:
+			#cell is NOT full
+			#decerement count in old cell
+			agent_map[old_x][old_y] -= 1
+			
+			#update agent position
+			agent.position = potential_position
+			
+			#increment count in new cell
+			agent_map[new_x][new_y] += 1
+		else:
+			#cell IS full: stop moving and apply a large turn
+			agent.direction += randf_range(-PI, PI)
+			
 		# positie updated
-		agent.position += velocity * delta
-
+		#agent.position += velocity * delta
 		# teleporteer naar de andere edge (Wrap-around boundary)
-		agent.position.x = wrapf(agent.position.x, 0.0, screen_size.x)
-		agent.position.y = wrapf(agent.position.y, 0.0, screen_size.y)
+		#agent.position.x = wrapf(agent.position.x, 0.0, screen_size.x)
+		#agent.position.y = wrapf(agent.position.y, 0.0, screen_size.y)
 
 # agents tekenen
 func _draw():
