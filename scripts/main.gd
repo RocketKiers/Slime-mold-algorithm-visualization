@@ -7,18 +7,19 @@ var trail_map: Array # A 2d map array to hold pheremone values, recieves the sam
 var agent_map: Array # A 2d map array to track agent density in each cell
 
 
-const DECAY_RATE: float = 0.4   # How fast the pheromone disappears
-const DIFFUSION_RATE: float = 0.5 # How much the pheromone spreads
 
 @export var number_of_agents: int = 2000 # Variable for the number of agents
 var AGENT_SPEED: float = 10.0 # speed of the moving agents
 var var_agent_size: float = 2.0 #changable agent size (appended to a absolute sine wave
-
 var TURN_STRENGTH: float = 2.0
 var RANDOM_TURN_AMOUNT: float = 0.1 # Small random perturbation in radians
 var SIMULATION_STEPS_PER_FRAME: int = 1
-const DEPOSIT_AMOUNT: float = 0.5 # The amount of pheromone an agent deposits
-const MAX_OCCUPANCY: int = 3 #Maximum number of agents allowed in one map cell
+
+
+const DECAY_RATE: float = 0.4   # How fast the pheromone disappears
+const DIFFUSION_RATE: float = 0.5 # How much the pheromone spreads
+const DEPOSIT_AMOUNT: float = 1.0 # The amount of pheromone an agent deposits
+const MAX_OCCUPANCY: int = 2 #Maximum number of agents allowed in one map cell
 
 var agent_color = Color("#FFD700")  #agent color
 var time : float = 0 # input for sine wave
@@ -29,13 +30,13 @@ var agents: Array[Agent] = [] #array to hold all agents
 func _ready():
 	# Initialize the trail map size based on the viewport and scale
 	var screen_size = get_viewport_rect().size
-	map_width = int(screen_size.x / MAP_SCALE)
-	map_height = int(screen_size.y / MAP_SCALE)
+	map_width = int(screen_size.x / MAP_SCALE) #get the map width in # of tiles
+	map_height = int(screen_size.y / MAP_SCALE) #get the map height in # of tiles
+	
 	# Initialize the 2D array (every coordinate filled with 0.0, same size as normal map)
 	trail_map.resize(map_width)
 	agent_map.resize(map_width)
-	
-	for i in map_width:
+	for i in map_width: 
 		trail_map[i] = Array()
 		trail_map[i].resize(map_height)
 		trail_map[i].fill(0.0)
@@ -49,8 +50,7 @@ func _ready():
 
 func _initialize_agents():
 	
-
-	# Get the area where agents can start (e.g., the screen size)(has a .x and .y exstension)
+	# Get the area where agents can start (the screen size)(has a .x and .y exstension)
 	var screen_size = get_viewport_rect().size
 
 	# Loop to create and add the agents
@@ -63,7 +63,6 @@ func _initialize_agents():
 		var angle = deg_to_rad(fixed_direction)  # convert degrees to radians
 		var start_x = middle_x + cos(angle) * radius #don't know how this works
 		var start_y = middle_y + sin(angle) * radius #don't know how this works
-		
 		var start_position = Vector2(start_x, start_y)
 		
 		# 2. Spawn the agents in random directions (from 0 to 2*PI, aka TAU)
@@ -87,7 +86,7 @@ func _world_to_map(world_pos: Vector2) -> Vector2:
 
 # Reads the pheromone value at a map cell
 func _get_pheromone_value(map_coords: Vector2) -> float:
-	return trail_map[int(map_coords.x)][int(map_coords.y)]
+	return trail_map[int(map_coords.x)][int(map_coords.y)] # trail_map = pheremone map
 
 # Deposits pheromone at an agent's location
 func _deposit_pheromone(agent: Agent):
@@ -95,19 +94,18 @@ func _deposit_pheromone(agent: Agent):
 	var pheremone_x = int(map_coords.x)
 	var pheremone_y = int(map_coords.y)
 	
-	# Deposit the pheromone (clamping it to a max value to prevent overflow (in this case 10.0))
+	# Deposit the pheromone (clamping it to a max value to prevent overflow (which is 10.0))
 	trail_map[pheremone_x][pheremone_y] = min(trail_map[pheremone_x][pheremone_y] + DEPOSIT_AMOUNT, 10.0)
 
 func _update_trail_map(delta: float):
 	# This loop applies the decay over time
-	var visual_decay_rate: int = 4
 	for x in map_width:
 		for y in map_height:
 			var current_value = trail_map[x][y]
 
 			# The DECAY_RATE determines how fast the value drops
 			# Note: This is a percentage decay (current_value * DECAY_RATE)
-			var decay_amount = current_value * DECAY_RATE * delta * visual_decay_rate
+			var decay_amount = current_value * DECAY_RATE * delta
 
 			# Subtract the decay amount, ensuring the value doesn't go below zero
 			trail_map[x][y] = max(0.0, current_value - decay_amount)
