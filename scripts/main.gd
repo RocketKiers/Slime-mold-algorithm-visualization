@@ -6,9 +6,6 @@ var map_height: int
 var trail_map: Array # A 2d map array to hold pheremone values, recieves the same resolution as the map
 var agent_map: Array # A 2d map array to track agent density in each cell
 
-# variables for Image Texture Visualization (don't know if it's going to work)
-var trail_image: Image
-var trail_texture: ImageTexture
 
 
 @export var number_of_agents: int = 2000 # Variable for the number of agents
@@ -47,15 +44,6 @@ func _ready():
 		agent_map[i] = Array()
 		agent_map[i].resize(map_height)
 		agent_map[i].fill(0)
-		
-		
-	# create image for pheremone visualization (want to stap using draw_rect for performance reasons)
-	trail_image = Image.new()
-	# make the image with the right dimensions
-	trail_image.create(map_width, map_height, false, Image.FORMAT_RF)
-	
-	trail_texture = ImageTexture.new()
-	#trail_texture.set_size_override(get_viewport_rect().size) # Optional: Set size to screen for scaling
 	
 	_initialize_agents()
 	randomize()
@@ -122,31 +110,6 @@ func _update_trail_map(delta: float):
 			# Subtract the decay amount, ensuring the value doesn't go below zero
 			trail_map[x][y] = max(0.0, current_value - decay_amount)
 
-func _update_trail_image():
-
-	var max_pheromone = 10.0
-
-	for x in map_width:
-		for y in map_height:
-			var pheromone_value = trail_map[x][y]
-
-			if pheromone_value <= 0.0:
-				trail_image.set_pixel(x, y, Color.BLACK) # Set background color
-				continue
-				
-			# Normalize the value (0.0 to 1.0) for brightness
-			var brightness = pheromone_value / max_pheromone
-			
-			# Use the brightness to set the color (yellow color)
-			# You set the color based on the value, but L8 is grayscale, so using brightness is simpler.
-			# To get the yellow color, we'll use Color.WHITE for the trail image
-			# and let the final drawing step handle the tint.
-			trail_image.set_pixel(x, y, Color(brightness, brightness, brightness))
-			
-	# Update the texture from the modified image
-	trail_texture.update(trail_image)
-
-
 # _process wordt elke frame gecalled, delta is tijd sinds laatste call
 func _process(delta):
 	time += delta
@@ -154,8 +117,6 @@ func _process(delta):
 	
 	#make pheremone decay
 	_update_trail_map(delta)
-	
-	_update_trail_image()
 	
 	queue_redraw()
 	var sub_delta = delta / SIMULATION_STEPS_PER_FRAME #control of time by changing delta
@@ -248,32 +209,28 @@ func _move_agents(delta: float):
 # agents tekenen
 func _draw():
 	# 1. Loop through every cell in the trail_map
-#	for x in (map_width):
-#		for y in (map_height):
-#			var pheromone_value = trail_map[x][y]
-#
-#			# Skip drawing if the pheromone is 0
-#			if pheromone_value <= 0.0:
-#				continue
-#
-#			# Higher value = more opaque/lighter color
-#			var normalized_value = pheromone_value / 20.0
-#
-#			# Create a faint color based on the value
-#			# Example: A blue color that gets more opaque as value increases
-#
-#			# 3. Calculate screen position and size
-#			var rect_pos = Vector2(x * MAP_SCALE, y * MAP_SCALE)
-#			var rect_size = Vector2(MAP_SCALE, MAP_SCALE)
-#			#var under_rect_size = Vector2(MAP_SCALE + 2, MAP_SCALE + 2)
-#			# 4. Draw the cell
-#			#draw_rect(Rect2(rect_pos, under_rect_size), trail_color)
-#			draw_rect(Rect2(rect_pos, rect_size), trail_color)
+	for x in (map_width):
+		for y in (map_height):
+			var pheromone_value = trail_map[x][y]
+			
+			# Skip drawing if the pheromone is 0
+			if pheromone_value <= 0.0:
+				continue
 
-	var screen_size = get_viewport_rect().size
-	var trail_color = Color(1.0, 1.0, 0.6) 
-	draw_texture_rect(trail_texture, Rect2(0, 0, screen_size.x, screen_size.y), false, trail_color)	
+			# Higher value = more opaque/lighter color
+			var normalized_value = pheromone_value / 20.0
 
+			# Create a faint color based on the value
+			# Example: A blue color that gets more opaque as value increases
+			var trail_color = Color(1.0, 1.0, 0.6, normalized_value) 
+
+			# 3. Calculate screen position and size
+			var rect_pos = Vector2(x * MAP_SCALE, y * MAP_SCALE)
+			var rect_size = Vector2(MAP_SCALE, MAP_SCALE)
+			#var under_rect_size = Vector2(MAP_SCALE + 2, MAP_SCALE + 2)
+			# 4. Draw the cell
+			#draw_rect(Rect2(rect_pos, under_rect_size), trail_color)
+			draw_rect(Rect2(rect_pos, rect_size), trail_color)
 
 	for agent in agents:
 		draw_circle(agent.position, agent_size, agent_color)
