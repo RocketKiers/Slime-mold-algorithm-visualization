@@ -4,4 +4,4 @@
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_v35sv")
-number_of_agents = 1000
+number_of_agents = 3000

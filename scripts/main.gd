@@ -53,25 +53,18 @@ func _initialize_agents():
 	# Get the area where agents can start (the screen size)(has a .x and .y exstension)
 	var screen_size = get_viewport_rect().size
 
-	# Loop to create and add the agents
+	var hubs = [
+		Vector2(screen_size.x * 0.25, screen_size.y * 0.25),
+		Vector2(screen_size.x * 0.75, screen_size.y * 0.25),
+		Vector2(screen_size.x * 0.5, screen_size.y * 0.75)
+	]
+
 	for i in number_of_agents:
-
-		var middle_x = screen_size.x / 2 #middle point of the screen
-		var middle_y = screen_size.y / 2 #middle part of the screen
-		var fixed_direction = i * 360.0 / number_of_agents  # angle in degrees, loops through 360 degrees the the amount of agents you have
-		var radius = 200 #how far from the middle point the agents spawn
-		var angle = deg_to_rad(fixed_direction)  # convert degrees to radians
-		var start_x = middle_x + cos(angle) * radius #don't know how this works
-		var start_y = middle_y + sin(angle) * radius #don't know how this works
-		var start_position = Vector2(start_x, start_y)
-		
-		# 2. Spawn the agents in random directions (from 0 to 2*PI, aka TAU)
-		var random_direction = randf_range(0.0, TAU)
-		# 3. spawn a new agent
-		var agent = Agent.new(start_position, random_direction, AGENT_SPEED)
-
-		# 4. Add the agent to the array
+		var center = hubs[i % hubs.size()] # Cycle through hubs
+		var offset = Vector2(randf_range(-30, 30), randf_range(-30, 30))
+		var agent = Agent.new(center + offset, randf_range(0, TAU), AGENT_SPEED)
 		agents.append(agent)
+
 
 	print("Initialized %s agents." % agents.size())
 
