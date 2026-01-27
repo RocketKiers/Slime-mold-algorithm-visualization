@@ -47,33 +47,33 @@ func _ready():
 	
 	_initialize_agents()
 	randomize()
-	
-	
+
 func _initialize_agents():
+	
+	# Get the area where agents can start (the screen size)(has a .x and .y exstension)
 	var screen_size = get_viewport_rect().size
-	var center = screen_size / 2
-	var max_radius = 200.0
 
+	# Loop to create and add the agents
 	for i in number_of_agents:
-		# 1. Generate a random angle and a random radius
-		# randf() naturally creates higher density in the center
-		var angle = randf() * TAU
-		var radius = randf() * max_radius
-		
-		# 2. Calculate position using Vector2 math
-		var start_position = center + Vector2.from_angle(angle) * radius
-		
-		# Point the agent away from the center
-		var away_from_center = angle 
-		# Add a small random offset (e.g., +/- 45 degrees) so they don't move in a perfect line
-		var variation = randf_range(-PI/4, PI/4)
-		var final_direction = away_from_center + variation
 
-		var agent = Agent.new(start_position, final_direction, AGENT_SPEED)
+		var middle_x = screen_size.x / 2 #middle point of the screen
+		var middle_y = screen_size.y / 2 #middle part of the screen
+		var fixed_direction = i * 360.0 / number_of_agents  # angle in degrees, loops through 360 degrees the the amount of agents you have
+		var radius = 200 #how far from the middle point the agents spawn
+		var angle = deg_to_rad(fixed_direction)  # convert degrees to radians
+		var start_x = middle_x + cos(angle) * radius #don't know how this works
+		var start_y = middle_y + sin(angle) * radius #don't know how this works
+		var start_position = Vector2(start_x, start_y)
+		
+		# 2. Spawn the agents in random directions (from 0 to 2*PI, aka TAU)
+		var random_direction = randf_range(0.0, TAU)
+		# 3. spawn a new agent
+		var agent = Agent.new(start_position, random_direction, AGENT_SPEED)
 
+		# 4. Add the agent to the array
 		agents.append(agent)
 
-	print("Initialized %s agents." % agents.size())	
+	print("Initialized %s agents." % agents.size())
 
 # Converts a screen position (Vector2) to a map cell coordinate (Vector2)
 func _world_to_map(world_pos: Vector2) -> Vector2:
