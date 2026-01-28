@@ -5,6 +5,7 @@ var map_width: int
 var map_height: int
 var trail_map: Array # A 2d map array to hold pheremone values, recieves the same resolution as the map
 var agent_map: Array # A 2d map array to track agent density in each cell
+var food_sources: Array[Vector2] = [Vector2(100,100), Vector2(400, 300)]
 
 
 
@@ -116,6 +117,17 @@ func _process(delta):
 
 	for i in SIMULATION_STEPS_PER_FRAME:
 		_move_agents(sub_delta) #move agents basesd on the assigned timestep
+		
+	#_apply_food()
+
+func _apply_food():
+	for source in food_sources:
+		var map_pos = _world_to_map(source)
+		for x in range(-1,2):
+			for y in range(-1,2):
+				var fx = clamp(int(map_pos.x) + x, 0, map_width - 1)
+				var fy = clamp(int(map_pos.y) + y, 0, map_height - 1)
+				trail_map[fx][fy] = 15.0 # Higher than your 10.0 deposit limit
 
 # The core logic for agent movement and steering
 func _move_agents(delta: float):
@@ -180,24 +192,23 @@ func _move_agents(delta: float):
 		var new_y = int(new_map_coords.y)
 		
 		if agent_map[new_x][new_y] < MAX_OCCUPANCY:
-			#cell is NOT full
-			#decerement count in old cell
+			# --- NORMAL BEHAVIOR ---
+			# Reset to base speed since we found a valid spot
+			agent.speed = AGENT_SPEED 
+			
 			agent_map[old_x][old_y] -= 1
-			
-			#update agent position
 			agent.position = potential_position
-			
-			#increment count in new cell
 			agent_map[new_x][new_y] += 1
 		else:
-			#cell IS full: stop moving and apply a large turn
-			agent.direction += randf_range(-PI, PI)
+			# --- CROWDING ESCAPE BEHAVIOR ---
+			# 1. Boost speed to force the agent through the crowd
+			agent.speed = AGENT_SPEED * 4.0 
 			
-		# positie updated
-		#agent.position += velocity * delta
-		# teleporteer naar de andere edge (Wrap-around boundary)
-		#agent.position.x = wrapf(agent.position.x, 0.0, screen_size.x)
-		#agent.position.y = wrapf(agent.position.y, 0.0, screen_size.y)
+			# 2. Allow them to move anyway (ignoring occupancy briefly) 
+			# or they will just vibrate in place.
+			agent_map[old_x][old_y] -= 1
+			agent.position = potential_position
+			agent_map[new_x][new_y] += 1
 
 # agents tekenen
 func _draw():
