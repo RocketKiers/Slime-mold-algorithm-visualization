@@ -202,7 +202,8 @@ func _move_agents(delta: float):
 		else:
 			# --- CROWDING ESCAPE BEHAVIOR ---
 			# 1. Boost speed to force the agent through the crowd
-			agent.speed = AGENT_SPEED * 4.0 
+			agent.speed = AGENT_SPEED * 4.0
+			#agent.speed = AGENT_SPEED * agent_map[new_x][new_y] #make the speed relative to the amount of agents in cell
 			
 			# 2. Allow them to move anyway (ignoring occupancy briefly) 
 			# or they will just vibrate in place.
