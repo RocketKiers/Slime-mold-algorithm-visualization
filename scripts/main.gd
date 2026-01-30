@@ -1,6 +1,6 @@
 extends Node2D
 
-const MAP_SCALE: int = 8 # that many pixel make one tile (4x4 tiles)
+const MAP_SCALE: int = 7 # that many pixel make one tile (4x4 tiles)
 var map_width: int
 var map_height: int
 var trail_map: Array # A 2d map array to hold pheremone values, recieves the same resolution as the map
@@ -22,7 +22,7 @@ const DIFFUSION_RATE: float = 0.5 # How much the pheromone spreads
 const DEPOSIT_AMOUNT: float = 1.0 # The amount of pheromone an agent deposits
 const MAX_OCCUPANCY: int = 2 #Maximum number of agents allowed in one map cell
 
-var agent_color = Color("#FFD700")  #agent color
+var agent_color = Color("#FFD70050")  #agent color
 var time : float = 0 # input for sine wave
 var agent_size: float # original variable, obsolete after change. Maybe adjust (?)
 
