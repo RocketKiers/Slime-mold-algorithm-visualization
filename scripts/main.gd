@@ -57,7 +57,20 @@ func _initialize_agents():
 	var hubs = [
 		Vector2(screen_size.x * 0.25, screen_size.y * 0.25),
 		Vector2(screen_size.x * 0.75, screen_size.y * 0.25),
-		Vector2(screen_size.x * 0.5, screen_size.y * 0.75)
+		Vector2(screen_size.x * 0.5, screen_size.y * 0.75),
+#		Vector2(screen_size.x * 0.5, screen_size.y * 0.7),
+#		Vector2(screen_size.x * 0.475, screen_size.y * 0.6),
+#		Vector2(screen_size.x * 0.525, screen_size.y * 0.6),
+#		Vector2(screen_size.x * 0.45, screen_size.y * 0.5),
+#		Vector2(screen_size.x * 0.5, screen_size.y * 0.5),
+#		Vector2(screen_size.x * 0.55, screen_size.y * 0.5),
+#		Vector2(screen_size.x * 0.4, screen_size.y * 0.4),
+#		Vector2(screen_size.x * 0.45, screen_size.y * 0.4),
+#		Vector2(screen_size.x * 0.5, screen_size.y * 0.4),
+#		Vector2(screen_size.x * 0.55, screen_size.y * 0.4),
+#		Vector2(screen_size.x * 0.6, screen_size.y * 0.4),
+#		Vector2(screen_size.x * 0.55, screen_size.y * 0.3),
+#		Vector2(screen_size.x * 0.45, screen_size.y * 0.3),
 	]
 
 	for i in number_of_agents:
