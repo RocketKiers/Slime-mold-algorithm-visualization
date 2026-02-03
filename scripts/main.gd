@@ -1,32 +1,29 @@
 extends Node2D
 
-const MAP_SCALE: int = 7 # that many pixel make one tile (4x4 tiles)
+const MAP_SCALE: int = 7 # zo veel pixels maken een tile (7x7 tiles)
 var map_width: int
 var map_height: int
-var trail_map: Array # A 2d map array to hold pheremone values, recieves the same resolution as the map
-var agent_map: Array # A 2d map array to track agent density in each cell
-var food_sources: Array[Vector2] = [Vector2(100,100), Vector2(400, 300)]
+var trail_map: Array # een 2d map array om pheremone waarden te houden (zelfde resolution als agent map
+var agent_map: Array # een 2d map array om de agent cell dichtheid bij te houden
 
-
-
-@export var number_of_agents: int = 2000 # Variable for the number of agents
-var AGENT_SPEED: float = 10.0 # speed of the moving agents
-var var_agent_size: float = 2.0 #changable agent size (appended to a absolute sine wave
-var TURN_STRENGTH: float = 2.0
-var RANDOM_TURN_AMOUNT: float = 0.1 # Small random perturbation in radians
+@export var number_of_agents: int = 2000 # variabel for aantal agents
+var AGENT_SPEED: float = 10.0 # snelheid agents
+var var_agent_size: float = 2.0 #variabel agent grootte (vastgemaakt aan een sinus golf om pulsering van physarum polycephalum te simuleren)
+var TURN_STRENGTH: float = 2.0 #factor om te bepalen hoe scherp een agent kan draaien
+var RANDOM_TURN_AMOUNT: float = 0.1 # Kleine random verstoringen in radialen
 var SIMULATION_STEPS_PER_FRAME: int = 1
 
 
-const DECAY_RATE: float = 0.4   # How fast the pheromone disappears
-const DIFFUSION_RATE: float = 0.5 # How much the pheromone spreads
-const DEPOSIT_AMOUNT: float = 1.0 # The amount of pheromone an agent deposits
-const MAX_OCCUPANCY: int = 2 #Maximum number of agents allowed in one map cell
+const DECAY_RATE: float = 0.4   # hoe snel het feremoon verdwijt
+const DIFFUSION_RATE: float = 0.5 # hoeveel de feremoon verspreidt
+const DEPOSIT_AMOUNT: float = 1.0 # hoeveel feremoon een agent afzet
+const MAX_OCCUPANCY: int = 2 #maximum aantal agents toegestaan in een a cell
 
-var agent_color = Color("#FFD70050")  #agent color
-var time : float = 0 # input for sine wave
-var agent_size: float # original variable, obsolete after change. Maybe adjust (?)
+var agent_color = Color("#FFD70000")  #agent kleur (laatste twee digits zijn opacity)
+var time : float = 0 # tijd inupt voor sinus golf
+var agent_size: float
 
-var agents: Array[Agent] = [] #array to hold all agents
+var agents: Array[Agent] = [] #array voor alle agents
 
 func _ready():
 	# Initialize the trail map size based on the viewport and scale
@@ -54,31 +51,17 @@ func _initialize_agents():
 	# Get the area where agents can start (the screen size)(has a .x and .y exstension)
 	var screen_size = get_viewport_rect().size
 
-	var hubs = [
+	var hubs = [ #centrale hubs waar agents spawnen
 		Vector2(screen_size.x * 0.25, screen_size.y * 0.25),
 		Vector2(screen_size.x * 0.75, screen_size.y * 0.25),
-		Vector2(screen_size.x * 0.5, screen_size.y * 0.75),
-#		Vector2(screen_size.x * 0.5, screen_size.y * 0.7),
-#		Vector2(screen_size.x * 0.475, screen_size.y * 0.6),
-#		Vector2(screen_size.x * 0.525, screen_size.y * 0.6),
-#		Vector2(screen_size.x * 0.45, screen_size.y * 0.5),
-#		Vector2(screen_size.x * 0.5, screen_size.y * 0.5),
-#		Vector2(screen_size.x * 0.55, screen_size.y * 0.5),
-#		Vector2(screen_size.x * 0.4, screen_size.y * 0.4),
-#		Vector2(screen_size.x * 0.45, screen_size.y * 0.4),
-#		Vector2(screen_size.x * 0.5, screen_size.y * 0.4),
-#		Vector2(screen_size.x * 0.55, screen_size.y * 0.4),
-#		Vector2(screen_size.x * 0.6, screen_size.y * 0.4),
-#		Vector2(screen_size.x * 0.55, screen_size.y * 0.3),
-#		Vector2(screen_size.x * 0.45, screen_size.y * 0.3),
+		Vector2(screen_size.x * 0.5, screen_size.y * 0.75), 
 	]
 
-	for i in number_of_agents:
+	for i in number_of_agents: #loop door alle agents door, assign ze naar een hub, geef random richting + andere variabelen
 		var center = hubs[i % hubs.size()] # Cycle through hubs
 		var offset = Vector2(randf_range(-30, 30), randf_range(-30, 30))
 		var agent = Agent.new(center + offset, randf_range(0, TAU), AGENT_SPEED)
 		agents.append(agent)
-
 
 	print("Initialized %s agents." % agents.size())
 
@@ -130,17 +113,6 @@ func _process(delta):
 
 	for i in SIMULATION_STEPS_PER_FRAME:
 		_move_agents(sub_delta) #move agents basesd on the assigned timestep
-		
-	#_apply_food()
-
-func _apply_food():
-	for source in food_sources:
-		var map_pos = _world_to_map(source)
-		for x in range(-1,2):
-			for y in range(-1,2):
-				var fx = clamp(int(map_pos.x) + x, 0, map_width - 1)
-				var fy = clamp(int(map_pos.y) + y, 0, map_height - 1)
-				trail_map[fx][fy] = 15.0 # Higher than your 10.0 deposit limit
 
 # The core logic for agent movement and steering
 func _move_agents(delta: float):
